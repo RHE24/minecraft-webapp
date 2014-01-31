@@ -19,6 +19,8 @@ Map.prototype = {
 
         this.defaultImageWidth = 30;
         this.defaultImageHeight = 30;
+        this.playerImageWidth = 30;
+        this.playerImageHeight = 30;
 
         this.controls = {};
         this.controls.tooltip = true;
@@ -33,6 +35,7 @@ Map.prototype = {
         this.landscapes = this.svg.append('g').attr('class','landscapes');
         this.borders = this.svg.append('g').attr('class','borders');
         this.fg = this.svg.append('g').attr('class','fg');
+        this.players = this.svg.append('g').attr('class','fg');
         this.guidingLines = this.svg.append('g').attr('class','guiding-lines');
 
         this.$svg = this.$el.find('svg');
@@ -44,6 +47,8 @@ Map.prototype = {
         this.tooltip.coordEl = this.tooltip.$el.find('.coord');
         this.tooltip.detailsEl = this.tooltip.$el.find('.details');
         this.$el.append(this.tooltip.$el);
+
+        this.zoomLevel = 0;
 
         this.render();
     },
@@ -97,6 +102,7 @@ Map.prototype = {
         this.renderPaths(this.bg, this.data.bg);
         this.renderPaths(this.landscapes, this.data.landscapes);
         this.renderPaths(this.borders, this.data.borders);
+        this.renderPlayers(this.players, this.data.players);
         
         this.renderImages(this.fg, this.data.fg);
     },
@@ -178,6 +184,54 @@ Map.prototype = {
             .remove();
     },
 
+    renderPlayers: function (gHandle, data) {
+        if(!data){
+            return;
+        }
+        var that = this;
+        // Images
+        var images = gHandle.selectAll("image")
+            .data(data, function (d) { return d.name })
+
+        images.enter().append('image')
+            .attr('x', function (d) {
+                return that.originX ? that.originX : 0;
+            })
+            .attr('y', function (d) {
+                return that.originY ? that.originY : 0;
+            })
+
+        images.transition()
+            .attr('x', function (d) { 
+                return that.xScale(d.overworldCoordinates.x) - (that.playerImageWidth / 2);
+            })
+            .attr('y', function (d) { 
+                return that.yScale(d.overworldCoordinates.z) - (that.playerImageHeight / 2);
+            })
+            .attr('width', that.playerImageWidth)
+            .attr('height', that.playerImageHeight)
+            .attr('xlink:href', this.setImage)
+            .each(function (d) {
+                $(this).off('mouseover');
+                $(this).off('mouseout');
+                $(this).on('mouseover', function (evt) {
+                    that.onImageMouseover(evt, d);
+                });
+                $(this).on('mouseout', function () {
+                    that.onImageMouseout(d);
+                })
+            });
+            
+        images.exit().transition()
+            .style('opacity', 0)
+            .remove();
+    },
+
+    updatePlayers: function (data) {
+        this.data.players = data;
+        this.render();
+    },
+
     renderGuidingLines: function (clientX, clientY) {
         var data = [];
         data.push({
@@ -224,7 +278,11 @@ Map.prototype = {
     },
 
     setImage: function (d) {
-        return 'css/img/' + d.img + '.png';
+        if(d.src){
+            return d.src;
+        } else {
+            return 'css/img/' + d.img + '.png';    
+        }
     },
 
     setScales: function () {

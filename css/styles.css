@@ -194,12 +194,20 @@ input {
     width: 100px;
     height: 100px;
     z-index: 1;
+    pointer-events: none;
+
 }
 
 .compass img {
     width: 100%;
+    pointer-events: none;
+
 }
 
 
 
 
+.players .image img{
+    width:50px;
+    border-radius:3px;
+}
