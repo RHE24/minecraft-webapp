@@ -135,8 +135,8 @@ input {
 }
 
 .chat .window .message .ip:after {
-    content: ' - ';
-    color: purple;
+    /*content: ' - ';
+    color: purple;*/
 }
 
 .chat .window .message .user {
@@ -148,7 +148,7 @@ input {
 }
 
 .chat .window .message .user:after {
-    content:': ';
+    /*content:': ';*/
 }
 
 .chat .input {
@@ -204,7 +204,31 @@ input {
 
 }
 
+.clock-container{
+    position: relative;
+    width: 200px;
+    height:200px;
+}
 
+
+.clock {
+    /*width: 200px;
+    height: 200px;*/
+}
+
+.clock-container img {
+    width:200px;
+}
+
+.pointer {
+    position: absolute;
+    left:50%;
+    bottom:50%;
+    width:50px;
+    margin-left: -50px;
+    border:1px solid red;
+    -webkit-transform-origin: 100% 100%;
+}
 
 
 .players .image img{

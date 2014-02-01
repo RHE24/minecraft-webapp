@@ -31,6 +31,33 @@ Chat.prototype = {
                 that.appendMessage($('<div class="message admin">Be sure to fill out your name to identify yourself.</div>'))
             },300)
         },1000);
+
+        this.socket = new WebSocket('ws://'+ Poll.getInstance().jsonapi.host+':' +(parseInt(Poll.getInstance().jsonapi.port)+2)+'/');
+        
+        this.socket.onopen = function (e) {
+            // cmd_log("Connected...\n");
+            console.log('Socket connection established');
+            that.appendMessage(that.createMessage('Connection to server established...'));
+            that.socket.send("/api/subscribe?source=chat&key="+ Poll.getInstance().jsonapi.createKey("chat"));
+        };
+
+        this.socket.onerror = function (e) {
+            console.log('ERROR');
+        };
+        
+        this.socket.onmessage = function (e) {
+            var data = JSON.parse(e.data);
+            console.log('Message received', e, data);
+            that.appendMessage(that.createMessage('<' + data.success.player + '> ' + data.success.message));
+        };
+        
+        this.socket.onclose = function (e) {
+            that.appendMessage(that.createMessage('Lost connection to server...'));  
+        }
+
+        window.unload = function () {
+            that.socket.close();
+        };
         
     },
 
@@ -39,12 +66,18 @@ Chat.prototype = {
         this.window[0].scrollTop = this.window[0].scrollHeight;
     },
 
-    createMessage: function (message) {
-        var ip = $('<span class="ip"></span>').text(window.ip);
-        var name = $('<span class="user"></span>').text(this.nameInput.val());
+    createMessage: function (message, user) {
+        var name = $('<span class="user"></span>').text(user);
         var message = $('<span class="msg"></span>').text(message);
-        var $el = $('<div class="message"></div>').append(ip).append(name).append(message);
+        var $el = $('<div class="message"></div>').append(name).append(message);
         return $el;
+    },
+
+    sendMessage: function (e) {
+        var url = Poll.getInstance().jsonapi.makeURL("broadcast", [e]);
+        url = "/api"+url.substr(url.lastIndexOf("/"));
+        url = url.substr(0, url.indexOf("&callback=?"));
+        this.socket.send(url);
     },
 
     setup: function () {
@@ -59,7 +92,8 @@ Chat.prototype = {
             var text = $(evt.target).val();
             if(text){
                 var message = this.createMessage(text);
-                this.appendMessage(message);
+                this.sendMessage('<' + window.ip + '> ' + text);
+                // this.appendMessage(message);
                 $(evt.target).val('');
             }
         }

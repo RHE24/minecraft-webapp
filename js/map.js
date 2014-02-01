@@ -103,7 +103,6 @@ Map.prototype = {
         this.renderPaths(this.landscapes, this.data.landscapes);
         this.renderPaths(this.borders, this.data.borders);
         this.renderPlayers(this.players, this.data.players);
-        
         this.renderImages(this.fg, this.data.fg);
     },
 
@@ -167,6 +166,7 @@ Map.prototype = {
                 $(this).off('mouseout');
                 $(this).on('click', function (evt) {
                     if(d.submap){
+                        that.zoomLevel++;
                         that.setData(d.submap);
                         that.render(evt.clientX, evt.clientY);    
                     }
@@ -286,7 +286,17 @@ Map.prototype = {
     },
 
     setScales: function () {
-        var overworldPoints = _.chain(this.data)
+        var data = this.data;
+        if(this.zoomLevel == 0){
+            // Incorporate Players into the scale calculations
+            data = _.chain()
+                        .union(this.data, this.data.players)
+                        .compact()
+                        .value();
+        }
+
+
+        var overworldPoints = _.chain(data)
             .map(function (point) {
                 if(point.edges){
                     return point.edges;

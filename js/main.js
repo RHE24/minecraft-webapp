@@ -1,3 +1,10 @@
+window.map = new Map(json.points);
+window.toolbar = new Toolbar;
+window.chat = new Chat;
+$('body').append(map.$el);
+$('body').append(toolbar.$el);
+$('body').append(chat.$el);
+Poll.getInstance().start()
 
 
 
@@ -5,20 +12,19 @@
 
 
 
-window.poll = new Poll();
 
 // Get Data
-var myDataRef = new Firebase('https://incandescent-fire-4522.firebaseio.com');
+// var myDataRef = new Firebase('https://incandescent-fire-4522.firebaseio.com');
 
-myDataRef.once('value', function (snapshot) {
-    window.map = new Map(snapshot.val().points);
-    window.toolbar = new Toolbar;
-    window.chat = new Chat;
-    $('body').append(map.$el);
-    $('body').append(toolbar.$el);
-    $('body').append(chat.$el);
-    window.poll.start()
-});
+// myDataRef.once('value', function (snapshot) {
+//     window.map = new Map(snapshot.val().points);
+//     window.toolbar = new Toolbar;
+//     window.chat = new Chat;
+//     $('body').append(map.$el);
+//     $('body').append(toolbar.$el);
+//     $('body').append(chat.$el);
+//     window.poll.start()
+// });
 
 // var something = snapshot.val();
 
