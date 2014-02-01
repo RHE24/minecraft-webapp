@@ -64,6 +64,16 @@ var json = {
                 "y": 97,
                 "z": 17210
             }
+        },{
+            "name": "Village",
+            "type": "image",
+            "img": "village",
+            "position": "fg",
+            "overworldCoordinates": {
+                "x": -701,
+                "y": 70,
+                "z": -1504
+            }
         },
         {
             "name": "Town",
@@ -79,14 +89,24 @@ var json = {
             },
             "submap": [
                 {
-                    "name": "Village",
+                    "name": "SWEETPIPEZ's Shack",
                     "type": "image",
-                    "img": "village",
+                    "img": "hut",
                     "position": "fg",
                     "overworldCoordinates": {
-                        "x": -701,
-                        "y": 70,
-                        "z": -1504
+                        "x": 22,
+                        "y": 63,
+                        "z": 409
+                    }
+                },{
+                    "name": "The Great Mines",
+                    "type": "image",
+                    "img": "mine",
+                    "position": "fg",
+                    "overworldCoordinates": {
+                        "x": -110,
+                        "y": 12,
+                        "z": 584
                     }
                 },{
                     "name": "Joel's Fishing Hut",
