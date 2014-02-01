@@ -273,3 +273,16 @@ input {
     width:50px;
     border-radius:3px;
 }
+
+.zoom-out {
+    position: absolute;
+    top:10px;
+    left:10px;
+    width:75px;
+    height:75px;
+    z-index: 1;
+    cursor: pointer;
+}
+
+
+

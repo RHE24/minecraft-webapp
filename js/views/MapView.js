@@ -7,8 +7,11 @@ MapView.prototype = {
 
     init: function (data) {
         this.el =   '<div class="map">' +
+                        '<div class="">' +
+                            '<img class="zoom-out" src="css/img/zoomOut.png" />' +
+                        '</div>' +
                         '<div class="compass">' +
-                            '<img src="css/img/compass.png" />'
+                            '<img src="css/img/compass.png" />' +
                         '</div>' +
                     '</div>'
 
@@ -49,6 +52,7 @@ MapView.prototype = {
         this.$el.append(this.tooltip.$el);
 
         this.zoomLevel = 0;
+        this.currentLevel = data;
 
         this.render();
     },
@@ -71,6 +75,8 @@ MapView.prototype = {
     setListeners: function () {
         $(window).on('resize', this.onResize);
         $('.controls input').on('change', this.onControlsChange)
+        this.onClickZoom = _.bind(this.onClickZoom, this);
+        this.$el.find('.zoom-out').on('click', this.onClickZoom);
     },
 
     setData: function (data) {
@@ -133,6 +139,10 @@ MapView.prototype = {
             .attr('d', function (d) { 
                 return lineFn(d.edges);
             });
+
+        paths.exit().transition()
+            .style('opacity',0)
+            .remove();
     },
 
     renderImages: function (gHandle, data) {
@@ -164,10 +174,14 @@ MapView.prototype = {
             .each(function (d) {
                 $(this).off('mouseover');
                 $(this).off('mouseout');
+                $(this).off('click');
                 $(this).on('click', function (evt) {
                     if(d.submap){
                         that.zoomLevel++;
-                        that.setData(d.submap);
+                        var parent = that.currentLevel;
+                        that.currentLevel = d.submap;
+                        that.currentLevel.parent = parent;
+                        that.setData(that.currentLevel);
                         that.render(evt.clientX, evt.clientY);    
                     }
                 });
@@ -225,6 +239,15 @@ MapView.prototype = {
         images.exit().transition()
             .style('opacity', 0)
             .remove();
+    },
+
+    zoomOut: function () {
+        if(this.zoomLevel != 0){
+            this.currentLevel = this.currentLevel.parent;
+            this.setData(this.currentLevel);  
+            this.render();
+            this.zoomLevel--;
+        }
     },
 
     updatePlayers: function (data) {
@@ -384,6 +407,10 @@ MapView.prototype = {
             return;
         }
         this.tooltip.detailsEl.text(d.name)
+    },
+
+    onClickZoom: function () {
+        this.zoomOut();
     }
 
 }
