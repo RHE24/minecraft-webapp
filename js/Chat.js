@@ -35,8 +35,6 @@ Chat.prototype = {
         this.socket = new WebSocket('ws://'+ Poll.getInstance().jsonapi.host+':' +(parseInt(Poll.getInstance().jsonapi.port)+2)+'/');
         
         this.socket.onopen = function (e) {
-            // cmd_log("Connected...\n");
-            console.log('Socket connection established');
             that.appendMessage(that.createMessage('Connection to server established...'));
             that.socket.send("/api/subscribe?source=chat&key="+ Poll.getInstance().jsonapi.createKey("chat"));
         };
@@ -47,7 +45,6 @@ Chat.prototype = {
         
         this.socket.onmessage = function (e) {
             var data = JSON.parse(e.data);
-            console.log('Message received', e, data);
             that.appendMessage(that.createMessage('<' + data.success.player + '> ' + data.success.message));
         };
         
