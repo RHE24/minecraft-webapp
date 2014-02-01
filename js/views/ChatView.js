@@ -1,27 +1,32 @@
 
-var Chat = function () {
+var ChatView = function () {
     this.init();
 }
 
-Chat.prototype = {
+ChatView.prototype = {
     
     init: function () {
         this.el =   '<div class="chat">' +
                         '<div class="container">' +
+                            '<div class="close-socket">Close Socket</div>' +
                             '<div class="window"></div>' +
                             '<div class="input">' +
                                 '<div class="name">' +
-                                    '<input class="name" type="text" placeholder="name" />' +
+                                    '<input type="text" placeholder="name" />' +
                                 '</div>' +
                                 '<div class="message">' +
-                                    '<input class="message" type="text" placeholder="say something..." />' +
+                                    '<input type="text" placeholder="say something..." />' +
                                 '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>'
 
         this.$el = $(this.el);
+        this.$messageInput = this.$el.find('.message input');
+        this.$nameInput = this.$el.find('.name input');
         this.setup();
+
+
         
         var that = this;
 
@@ -30,7 +35,7 @@ Chat.prototype = {
             setTimeout(function () {
                 that.appendMessage($('<div class="message admin">Be sure to fill out your name to identify yourself.</div>'))
             },300)
-        },1000);
+        },3000);
 
         this.socket = new WebSocket('ws://'+ Poll.getInstance().jsonapi.host+':' +(parseInt(Poll.getInstance().jsonapi.port)+2)+'/');
         
@@ -44,16 +49,24 @@ Chat.prototype = {
         };
         
         this.socket.onmessage = function (e) {
-            var data = JSON.parse(e.data);
-            that.appendMessage(that.createMessage('<' + data.success.player + '> ' + data.success.message));
+            var data = JSON.parse(e.data),
+                message = '';
+
+            if(!data.success.message){
+                return;
+            }
+
+            if(!data.success.player){
+                message = data.success.message;
+            } else {
+                message = '<' + data.success.player + '> ' + data.success.message;
+            }
+
+            that.appendMessage(that.createMessage(message));
         };
         
         this.socket.onclose = function (e) {
             that.appendMessage(that.createMessage('Lost connection to server...'));  
-        }
-
-        window.unload = function () {
-            that.socket.close();
         };
         
     },
@@ -70,8 +83,8 @@ Chat.prototype = {
         return $el;
     },
 
-    sendMessage: function (e) {
-        var url = Poll.getInstance().jsonapi.makeURL("broadcast", [e]);
+    sendMessage: function (message) {
+        var url = Poll.getInstance().jsonapi.makeURL("broadcast", [message]);
         url = "/api"+url.substr(url.lastIndexOf("/"));
         url = url.substr(0, url.indexOf("&callback=?"));
         this.socket.send(url);
@@ -82,17 +95,24 @@ Chat.prototype = {
         this.onInputKeyup = _.bind(this.onInputKeyup, this);
         this.$el.find('.input input').on('keyup', this.onInputKeyup);
         this.nameInput = this.$el.find('.name input');
+        this.onClickCloseSocket = _.bind(this.onClickCloseSocket, this);
+        this.$el.find('.close-socket').on('click', this.onClickCloseSocket);
     },
 
     onInputKeyup: function (evt) {
         if(evt.keyCode == 13){
-            var text = $(evt.target).val();
+            var text = this.$messageInput.val();
+            var name = this.$nameInput.val();
+            name = name ? name : 'Anonymouse';
             if(text){
                 var message = this.createMessage(text);
-                this.sendMessage('<' + window.ip + '> ' + text);
-                // this.appendMessage(message);
+                this.sendMessage('<' + window.ip + ' - ' + name + '> ' + text);
                 $(evt.target).val('');
             }
         }
+    },
+
+    onClickCloseSocket: function () {
+        this.socket.close();
     }
 }

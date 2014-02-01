@@ -1,9 +1,9 @@
 
-var Map = function (data) {
+var MapView = function (data) {
     this.init(data);
 }
 
-Map.prototype = {
+MapView.prototype = {
 
     init: function (data) {
         this.el =   '<div class="map">' +

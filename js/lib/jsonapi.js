@@ -86,7 +86,7 @@ function JSONAPI (obj) {
     };
     
     this.curl = function (url, cb) {
-        jQuery.getJSON(url, cb);
+        $.getJSON(url, cb);
     };
 
     /**

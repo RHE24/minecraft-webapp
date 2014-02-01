@@ -1,50 +1,33 @@
 
-var Toolbar = function () {
+var PlayersView = function () {
     this.init();
 }
 
-Toolbar.prototype = {
+PlayersView.prototype = {
 
     init: function () {
-        this.el = '<div class="sidebar">' +
-                    '<div class="header">' +
-                        '<img src="css/img/creeper.png" />' +
-                    '</div>' +
-                    '<div class="content">' +
+        this.el =   '<div class="content">' +
                         '<div class="players">' +
                             '<h1>Currently Online</h1>' +
-                            '<table></table>' +
+                            '<table>' +
+                                '<tr>' +
+                                    '<th></th>' +
+                                    '<th></th>' +
+                                    '<th><img src="css/img/heart.png" /></th>' +
+                                    '<th><img src="css/img/food.png" /></th>' +
+                                '</tr>' +
+                            '</table>' +
                         '</div>' +
-                        // '<div class="controls">' +
-                        //     '<label>Tooltip</label>' +
-                        //     '<input name="tooltip" type="checkbox" checked />' +
-                        //     '<label >Guiding Lines</label>' +
-                        //     '<input name="lines" type="checkbox" checked />' +
-                        // '</div>' +
-                        '<div class="clock-container">' +
-                            '<div class="clock">' +
-                                '<img src="css/img/clock.png"></img>' +
-                                '<div class="pointer"></div>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
-
-
+                    '</div>';
 
         this.$el = $(this.el);
         this.$playersTable = this.$el.find('.players table');
-        this.$pointer = this.$el.find('.pointer');
         this.setup();
     },
 
     setup: function () {
         this.onPlayersSuccess = _.bind(this.onPlayersSuccess, this);
-        this.onControlsChange = _.bind(this.onControlsChange, this);
-        this.onServerSuccess = _.bind(this.onServerSuccess, this);
-
         Poll.getInstance().subscribe('getPlayers', [], this.onPlayersSuccess);
-        Poll.getInstance().subscribe('getWorlds', [], this.onServerSuccess);
     },
 
     updatePlayer: function (player){
@@ -95,24 +78,6 @@ Toolbar.prototype = {
 
         window.map.updatePlayers(playerCoordinates);
         this.syncPlayersWithUI();
-    },
-
-    onServerSuccess: function (data) {
-        var world = data[0];
-        var time = world.time;
-        var degrees = (360/24000) * time;
-
-        this.$pointer.css({
-            '-webkit-transform':'rotate(' + degrees + 'deg)'
-        });
-    },
-
-    onControlsChange: function (evt) {
-        if($(evt.target).prop('checked')){
-            toolbar.controls[$(evt.target).attr('name')] = true;
-        } else {
-            toolbar.controls[$(evt.target).attr('name')] = false;
-        }
     }
-}
 
+}
