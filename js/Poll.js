@@ -1,91 +1,108 @@
+define([], function () {
 
+    var Poll = (function () {
+        
+        var instance;
 
-var Poll = (function () {
-    
-    var instance;
+        function init() {
 
-    function init() {
+            var mapCallbacks = function (data) {
+                    var success = data.success;
+                    _.each(success, function (success) {
+                        callbacks[success.source](success.success);
+                    });
+                },
 
-        var mapCallbacks = function (data) {
-            var success = data.success;
-            _.each(success, function (success) {
-                callbacks[success.source](success.success);
-            });
-        }
+                jsonapi = new JSONAPI({
+                    host:'67.222.234.99',
+                    port:'20059',
+                    username:'alecgorge',
+                    password:'MySecret',
+                    salt:'pepper123'
+                }),
 
-        var jsonapi = new JSONAPI({
-            host:'67.222.234.99',
-            port:'20059',
-            username:'alecgorge',
-            password:'MySecret',
-            salt:'pepper123'
-        });
+                subscriptions = {},
+                callbacks = {},
+                subscriptions = [],
+                argumentsArray = [],
+                run = false,
+                interval = 5000,
+                that = this,
+                callCount = 0,
 
-        var subscriptions = {}
-        var callbacks = {};
-        var subscriptions = [];
-        var argumentsArray = [];
-        var run = false;
-        var interval = 5000;
-        var that = this;
+                publicMethods = {
 
-        var publicMethods = {
+                jsonapi: jsonapi, 
 
-            jsonapi: jsonapi, 
+                subscribe: function (method, args, callback) {
+                    subscriptions.push(method);
+                    argumentsArray.push(args);
+                    callbacks[method] = callback;
+                },
 
-            subscribe: function (method, args, callback) {
-                subscriptions.push(method);
-                argumentsArray.push(args);
-                callbacks[method] = callback;
-            },
+                start: function () {
+                    if(run){
+                        return;
+                    }
+                    run = true;
+                    this.pollManager();
+                },
 
-            start: function () {
-                if(run){
-                    return;
+                stop: function () {
+                    run = false;
+                },
+
+                pollManager: function () {
+                    if(!run){
+                        return;
+                    }
+
+                    if(subscriptions.length){
+                        this.poll()    
+                    }
+
+                    setTimeout(this.pollManager, interval);
+                },
+
+                poll: function () {
+                    var that = this;
+                    var currentCall = callCount;
+
+                    var isRelevant = function () {
+                        return currentCall == callCount;
+                    }
+
+                    jsonapi.callMultiple(subscriptions, argumentsArray, function (data) {
+                        if(isRelevant()){
+                            mapCallbacks(data);
+                        }
+                    });
                 }
-                run = true;
-                this.poll();
-            },
-
-            stop: function () {
-                run = false;
-            },
-
-            poll: function () {
-                var that = this;
-                if(!run){
-                    return;
-                }
-
-                if(!subscriptions.length){
-                    setTimeout(that.poll, interval);
-                }
-
-                jsonapi.callMultiple(subscriptions, argumentsArray, function (data) {
-                    mapCallbacks(data);
-                    setTimeout(that.poll, interval);
-                });
             }
+
+            publicMethods.poll = _.bind(publicMethods.poll, publicMethods);
+            publicMethods.pollManager = _.bind(publicMethods.pollManager, publicMethods);
+
+            return publicMethods;
         }
 
-        publicMethods.poll = _.bind(publicMethods.poll, publicMethods);
+        return {
+            // Get the Singleton instance if one exists
+            // or create one if it doesn't
+            getInstance: function () {
+         
+              if ( !instance ) {
+                instance = init();
+              }
+         
+              return instance;
+            }
+         
+          };
 
-        return publicMethods;
-    }
+    })();
 
-    return {
-        // Get the Singleton instance if one exists
-        // or create one if it doesn't
-        getInstance: function () {
-     
-          if ( !instance ) {
-            instance = init();
-          }
-     
-          return instance;
-        }
-     
-      };
+    return Poll;
 
-})();
+});
 

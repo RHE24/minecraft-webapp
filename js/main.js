@@ -1,24 +1,27 @@
-window.map = new MapView(json.points);
-window.sidebar = new SidebarView;
-window.chat = new ChatView;
-$('body').append(map.$el);
-$('body').append(sidebar.$el);
-$('body').append(chat.$el);
-Poll.getInstance().start()
+
+requirejs.config({
+
+    shim: {
+        'lib/zepto': {
+            exports:'$'
+        },
+        'lib/underscore': {
+            exports: '_'
+        },
+        'lib/jsonapi': {
+            deps: ['lib/zepto'],
+            exports: 'JSONAPI'
+        },
+        'json/points': {},
+        'lib/d3': {
+            exports: 'd3'
+        }
+    }
+});
+
+// Start the app
+requirejs(["app"]);
 
 
-window.ip = 'no-ip';
-function getip(json){
-  window.ip = json.ip
-}
-
-window.unload = function () {
-    chat.socket.close();
-};
-
-window.onbeforeunload = function() {
-    chat.socket.onclose = function () {}; // disable onclose handler first
-    chat.socket.close()
-};
 
 
